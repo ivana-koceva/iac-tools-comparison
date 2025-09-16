@@ -1,16 +1,3 @@
-terraform {
-  required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "3.6.2"
-    }
-  }
-}
-
-provider "docker" {
-  host = "unix:///var/run/docker.sock"
-}
-
 # pull the images
 resource "docker_image" "blog_app" {
   name = "ivanakoceva/blog-app:latest"
