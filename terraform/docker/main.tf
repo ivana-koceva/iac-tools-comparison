@@ -23,13 +23,13 @@ resource "docker_container" "db_service" {
   
   ports {
      internal = 5432
-     external = 5432
+     external = var.postgres_port
   }
   
   env = [
-     "POSTGRES_DB=blogs",
-     "POSTGRES_USER=postgres",
-     "POSTGRES_PASSWORD=admin"
+     "POSTGRES_DB=${var.postgres_db}",
+     "POSTGRES_USER=${var.postgres_user}",
+     "POSTGRES_PASSWORD=${var.postgres_password}"
   ]
 }
 
@@ -43,15 +43,15 @@ resource "docker_container" "blog_service" {
 
   ports {
      internal = 8080
-     external = 8080
+     external = var.app_port
   }
  
   env = [
       "POSTGRES_HOST=db_service",
-      "POSTGRES_USER=postgres",
-      "POSTGRES_PASSWORD=admin",
-      "POSTGRES_PORT=5432",
-      "POSTGRES_DB=blogs"
+      "POSTGRES_USER=${var.postgres_user}",
+      "POSTGRES_PASSWORD=${var.postgres_password}",
+      "POSTGRES_PORT=${var.postgres_port}",
+      "POSTGRES_DB=${var.postgres_db}"
   ]
 }
 
