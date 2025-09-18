@@ -53,6 +53,9 @@ resource "docker_container" "blog_service" {
       "POSTGRES_PORT=${var.postgres_port}",
       "POSTGRES_DB=${var.postgres_db}"
   ]
+
+  # start after db container
+  depends_on = [docker_container.db_service]
 }
 
 
