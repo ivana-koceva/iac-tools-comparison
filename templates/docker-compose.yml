@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  blog-service:
+    image: ivanakoceva/blog-app
+    restart: always
+    ports:
+      - "${BLOG_APP_PORT}:8080"
+    depends_on:
+      - blogdb
+    environment:
+      POSTGRES_HOST: ${BLOG_DB_HOST}
+      POSTGRES_USER: ${BLOG_DB_USER}
+      POSTGRES_PASSWORD: ${BLOG_DB_PASSWORD}
+      POSTGRES_PORT: ${BLOG_DB_PORT}
+      POSTGRES_DB: ${BLOG_DB_NAME}
+  blogdb:
+    image: postgres
+    volumes:
+      - blogdb_data:/var/lib/postgresql/data
+    ports:
+      - "${BLOG_DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${BLOG_DB_NAME}
+      POSTGRES_USER: ${BLOG_DB_USER}
+      POSTGRES_PASSWORD: ${BLOG_DB_PASSWORD}
+volumes:
+  blogdb_data:
