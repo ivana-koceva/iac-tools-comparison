@@ -31,6 +31,12 @@ resource "docker_container" "db_service" {
      "POSTGRES_USER=${var.postgres_user}",
      "POSTGRES_PASSWORD=${var.postgres_password}"
   ]
+
+  # created local volume for container to mount
+  volumes {
+    volume_name    = "blogdb_data"
+    container_path = "/var/lib/postgresql/data"
+  }
 }
 
 resource "docker_container" "blog_service" {
