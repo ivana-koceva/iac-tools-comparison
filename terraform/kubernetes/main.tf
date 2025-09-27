@@ -184,6 +184,32 @@ resource "kubernetes_stateful_set" "blogdb" {
               }
             }
           }
+
+          env {
+            name  = "PGDATA"
+            value = "/var/lib/postgresql/pgdata"
+          }
+
+          volume_mount {
+            name       = "blogdb-data"
+            mount_path = "/var/lib/postgresql"
+          }
+        }
+      }
+    }
+    
+    volume_claim_template {
+      metadata {
+        name = "blogdb-data"
+      }
+
+      spec {
+        access_modes = ["ReadWriteOnce"]
+
+        resources {
+          requests = {
+            storage = "1Gi"
+          }
         }
       }
     }
