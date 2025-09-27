@@ -3,3 +3,6 @@
 *.tfstate.backup
 *.tfvars
 .terraform.lock.hcl
+.env
+*.cast
+*.backup
