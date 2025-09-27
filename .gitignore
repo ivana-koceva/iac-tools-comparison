@@ -6,3 +6,4 @@
 .env
 *.cast
 *.backup
+pvc.yaml
