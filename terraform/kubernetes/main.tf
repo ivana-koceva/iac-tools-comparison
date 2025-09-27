@@ -1,15 +1,8 @@
-# create namespace
-resource "kubernetes_namespace" "blogs" {
-  metadata {
-    name = "blogs"
-  }
-}
-
 # configmap with db env
 resource "kubernetes_config_map" "blog-config" {
   metadata {
     name = "blog-config"
-    namespace = kubernetes_namespace.blogs.metadata.0.name
+    namespace = "blogs"
   }
 
   data = {
@@ -23,14 +16,14 @@ resource "kubernetes_config_map" "blog-config" {
 resource "kubernetes_secret" "blog-secrets" {
   metadata {
     name = "blog-secrets"
-    namespace = kubernetes_namespace.blogs.metadata.0.name
+    namespace = "blogs"
   }
 
   type = "Opaque"
 
   data = {
-    POSTGRES_USER = "cG9zdGdyZXM="
-    POSTGRES_PASSWORD = "YWRtaW4="
+    POSTGRES_USER = "postgres"
+    POSTGRES_PASSWORD = "admin"
   }
 }
 
@@ -38,7 +31,7 @@ resource "kubernetes_secret" "blog-secrets" {
 resource "kubernetes_deployment" "blog-deployment" {
   metadata {
     name = "blog-deployment"
-    namespace = kubernetes_namespace.blogs.metadata.0.name
+    namespace = "blogs"
   }
 
   spec {
@@ -126,7 +119,7 @@ resource "kubernetes_deployment" "blog-deployment" {
 resource "kubernetes_stateful_set" "blogdb" {
   metadata {
     name      = "blogdb"
-    namespace = kubernetes_namespace.blogs.metadata.0.name
+    namespace = "blogs"
   }
 
   spec {
@@ -195,20 +188,12 @@ resource "kubernetes_stateful_set" "blogdb" {
             mount_path = "/var/lib/postgresql"
           }
         }
-      }
-    }
-    
-    volume_claim_template {
-      metadata {
-        name = "blogdb-data"
-      }
+        # created local volume for container to mount
+        volume {
+          name = "blogdb-data"
 
-      spec {
-        access_modes = ["ReadWriteOnce"]
-
-        resources {
-          requests = {
-            storage = "1Gi"
+          persistent_volume_claim {
+            claim_name = "blogdb-data"
           }
         }
       }
@@ -222,7 +207,7 @@ resource "kubernetes_stateful_set" "blogdb" {
 resource "kubernetes_service" "blog-service" {
     metadata {
         name = "blog-service"
-        namespace = kubernetes_namespace.blogs.metadata.0.name
+        namespace = "blogs"
     }
 
     spec {
@@ -242,7 +227,7 @@ resource "kubernetes_service" "blog-service" {
 resource "kubernetes_service" "blogdb" {
     metadata {
         name = "blogdb"
-        namespace = kubernetes_namespace.blogs.metadata.0.name
+        namespace = "blogs"
     }
 
     spec {
@@ -263,7 +248,7 @@ resource "kubernetes_service" "blogdb" {
 resource "kubernetes_ingress_v1" "blog-ingress" {
     metadata {
         name = "blog-ingress"
-        namespace = kubernetes_namespace.blogs.metadata.0.name
+        namespace = "blogs"
     }
 
     spec {
