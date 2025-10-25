@@ -14,7 +14,7 @@ services:
       POSTGRES_PORT: ${BLOG_DB_PORT}
       POSTGRES_DB: ${BLOG_DB_NAME}
   blogdb:
-    image: postgres
+    image: postgres:17-alpine
     volumes:
       - blogdb_data:/var/lib/postgresql/data
     ports:
