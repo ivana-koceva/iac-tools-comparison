@@ -1,0 +1,13 @@
+{
+  config:
+    {
+      "blogs:POSTGRES_DB": blogs,
+      "blogs:POSTGRES_HOST": db_service,
+      "blogs:POSTGRES_PORT": "5432",
+      "blogs:APPLICATION_PORT": "8080",
+      "blogs:POSTGRES_USER":
+        { secure: AAABADqXwTrEweJeEC6jaqkG9TEvWlD9lc/gB1VtUoGqA8AxxjrPUA== },
+      "blogs:POSTGRES_PASSWORD":
+        { secure: AAABAASMLXyvYrW/lo0eeN/6IjHUKay+chPgZBWB8UFxmue9iw== },
+    },
+}
