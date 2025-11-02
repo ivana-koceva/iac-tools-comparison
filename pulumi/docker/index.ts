@@ -32,3 +32,26 @@ const db_service = new docker.Container("db_service", {
         volumeName: blogdb_data.name,
     }],
 });
+
+const blog_service = new docker.Container("blog_service", {
+    image: blog_app.imageId,
+    name: "blog_service",
+    networksAdvanced: [{
+        name: blog_network.name,
+    }],
+    ports: [{
+        internal: 8080,
+        external: 8080,
+    }],
+    envs: [
+        "POSTGRES_HOST=db_service",
+        "POSTGRES_DB=blogs",
+        "POSTGRES_USER=postgres",
+        "POSTGRES_PASSWORD=admin",
+        "POSTGRES_PORT=5432",
+    ],
+    volumes: [{
+        containerPath: "/var/lib/postgresql/data",
+        volumeName: blogdb_data.name,
+    }],
+}, {dependsOn: db_service});
