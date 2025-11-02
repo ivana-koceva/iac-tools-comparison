@@ -61,8 +61,4 @@ const blog_service = new docker.Container("blog_service", {
         pulumi.interpolate`POSTGRES_PASSWORD=${POSTGRES_PASSWORD}`,
         `POSTGRES_PORT=${POSTGRES_PORT}`,
     ],
-    volumes: [{
-        containerPath: "/var/lib/postgresql/data",
-        volumeName: blogdb_data.name,
-    }],
 }, {dependsOn: [db_service]});
