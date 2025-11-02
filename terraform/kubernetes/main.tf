@@ -1,8 +1,15 @@
+# create namespace
+resource "kubernetes_namespace" "blogs" {
+  metadata {
+    name = "blogs"
+  }
+}
+
 # configmap with db env
 resource "kubernetes_config_map" "blog-config" {
   metadata {
     name = "blog-config"
-    namespace = "blogs"
+    namespace = kubernetes_namespace.blogs.metadata.0.name
   }
 
   data = {
@@ -16,7 +23,7 @@ resource "kubernetes_config_map" "blog-config" {
 resource "kubernetes_secret" "blog-secrets" {
   metadata {
     name = "blog-secrets"
-    namespace = "blogs"
+    namespace = kubernetes_namespace.blogs.metadata.0.name
   }
 
   type = "Opaque"
@@ -31,7 +38,7 @@ resource "kubernetes_secret" "blog-secrets" {
 resource "kubernetes_deployment" "blog-deployment" {
   metadata {
     name = "blog-deployment"
-    namespace = "blogs"
+    namespace = kubernetes_namespace.blogs.metadata.0.name
   }
 
   spec {
@@ -106,9 +113,8 @@ resource "kubernetes_deployment" "blog-deployment" {
                     name = "blog-secrets"
                     key  = "POSTGRES_PASSWORD" 
                     }
-                }
             }
-          
+          }
         }
       }
     }
@@ -119,7 +125,7 @@ resource "kubernetes_deployment" "blog-deployment" {
 resource "kubernetes_stateful_set" "blogdb" {
   metadata {
     name      = "blogdb"
-    namespace = "blogs"
+    namespace = kubernetes_namespace.blogs.metadata.0.name
   }
 
   spec {
@@ -142,7 +148,7 @@ resource "kubernetes_stateful_set" "blogdb" {
       spec {
         container {
           name  = "postgres"
-          image = "postgres:latest"
+          image = "postgres:17-alpine"
 
           port {
             container_port = 5432
@@ -185,15 +191,22 @@ resource "kubernetes_stateful_set" "blogdb" {
 
           volume_mount {
             name       = "blogdb-data"
-            mount_path = "/var/lib/postgresql"
+            mount_path = "/var/lib/postgresql/data"
           }
         }
-        # created local volume for container to mount
-        volume {
-          name = "blogdb-data"
-
-          persistent_volume_claim {
-            claim_name = "blogdb-data"
+        
+      }
+    }
+    # created local volume for container to mount
+    volume_claim_template {
+      metadata {
+        name = "blogdb-data"
+      }
+      spec {
+        access_modes = ["ReadWriteOnce"]
+        resources {
+          requests = {
+            storage = "1Gi"
           }
         }
       }
@@ -207,7 +220,7 @@ resource "kubernetes_stateful_set" "blogdb" {
 resource "kubernetes_service" "blog-service" {
     metadata {
         name = "blog-service"
-        namespace = "blogs"
+        namespace = kubernetes_namespace.blogs.metadata.0.name
     }
 
     spec {
@@ -227,7 +240,7 @@ resource "kubernetes_service" "blog-service" {
 resource "kubernetes_service" "blogdb" {
     metadata {
         name = "blogdb"
-        namespace = "blogs"
+        namespace = kubernetes_namespace.blogs.metadata.0.name
     }
 
     spec {
@@ -248,7 +261,7 @@ resource "kubernetes_service" "blogdb" {
 resource "kubernetes_ingress_v1" "blog-ingress" {
     metadata {
         name = "blog-ingress"
-        namespace = "blogs"
+        namespace = kubernetes_namespace.blogs.metadata.0.name
     }
 
     spec {
