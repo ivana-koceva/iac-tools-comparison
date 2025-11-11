@@ -1,0 +1,8 @@
+config:
+  blogs:POSTGRES_HOST: blogdb
+  blogs:POSTGRES_PORT: "5432"
+  blogs:POSTGRES_DB: blogs
+  blogs:POSTGRES_USER:
+    secure: AAABAKsnrC1ThbyHe0O8Hql2ntCw7dp1nblCJgy8zukWbise3smx9w==
+  blogs:POSTGRES_PASSWORD:
+    secure: AAABAD8wCe80PhgJ5ZCHFbJqCeVvEBzz+xSYA78k2SR61qXo5w==
