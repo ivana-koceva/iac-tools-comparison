@@ -1,8 +1,10 @@
+encryptionsalt: v1:6Te5S7+TaSc=:v1:tUCCmeMoTsU7vvgz:V6pl+VwnJIJIswz55/j3FOhCHkJ8JA==
 config:
+  blogs:POSTGRES_DB: blogs
   blogs:POSTGRES_HOST: blogdb
   blogs:POSTGRES_PORT: "5432"
-  blogs:POSTGRES_DB: blogs
+  blogs:APPLICATION_PORT: "8080"
   blogs:POSTGRES_USER:
-    secure: AAABAKsnrC1ThbyHe0O8Hql2ntCw7dp1nblCJgy8zukWbise3smx9w==
+    secure: v1:Sk1TldFQYSYq5gnA:pJJPzmORzqiGwQsG7veU1HJ2fRd6V557
   blogs:POSTGRES_PASSWORD:
-    secure: AAABAD8wCe80PhgJ5ZCHFbJqCeVvEBzz+xSYA78k2SR61qXo5w==
+    secure: v1:yWPbng3K0hl5iwAc:K6nCx7RM8v2kJ4cOlZs4XfJGtBkq
