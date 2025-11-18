@@ -17,7 +17,7 @@ jobs:
       - name: Terraform cloc
         id: terraform_loc
         run: |
-          cloc iac-tools-comparison/terraform/docker/main.tf --json > cloc_terraform.json
+          cloc ./terraform/docker/main.tf --json > cloc_terraform.json
           echo "terraform_loc=$(jq '.SUM.code' cloc_terraform.json)" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
