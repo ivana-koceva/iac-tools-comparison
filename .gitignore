@@ -9,3 +9,4 @@
 pvc.yaml
 /bin/
 /node_modules/
+*.tflint.hcl
