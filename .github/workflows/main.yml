@@ -24,8 +24,9 @@ jobs:
       - name: Terraform duplicate resources
         id: terraform_dupl
         run: |
-          jscpd -p '*/terraform/docker/main.json' -r json -o ./terraform/docker/reports
-          echo "terraform_dupl=$(jq '.statistics.total.clones' ./terraform/docker/reports/jscpd-report.json)" >> $GITHUB_OUTPUT
+          cd ./terraform/docker
+          jscpd -p 'main.json' -r json -o .
+          echo "terraform_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
           echo "Terraform LOC: ${{ steps.terraform_loc.outputs.terraform_loc }}"
