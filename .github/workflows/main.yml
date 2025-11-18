@@ -12,8 +12,8 @@ jobs:
         uses: actions/checkout@v5
       - name: Install dependencies
         run: |
-          apt install cloc
-          apt-get install jq
+          sudo apt install cloc
+          sudo apt-get install jq
       - name: Terraform cloc
         id: terraform_loc
         run: |
