@@ -17,11 +17,13 @@ jobs:
           npm install -g jscpd
           sudo apt-get install jq
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-      - name: Terraform cloc
-        id: terraform_loc
+      - name: Tools cloc
+        id: loc
         run: |
           cloc ./terraform/docker/main.tf --json > cloc_terraform.json
           echo "terraform_loc=$(jq '.SUM.code' cloc_terraform.json)" >> $GITHUB_OUTPUT
+          cloc ./pulumi/docker/index.ts --json > cloc_pulumi.json
+          echo "pulumi_loc=$(jq '.SUM.code' cloc_pulumi.json)" >> $GITHUB_OUTPUT
       - name: Terraform duplicate resources
         id: terraform_dupl
         run: |
@@ -36,7 +38,8 @@ jobs:
           echo "terraform_lint=$(echo $(($(jq '.issues | length' tflint-report.json) + $(jq '.errors | length' tflint-report.json))))" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
-          echo "Terraform LOC: ${{ steps.terraform_loc.outputs.terraform_loc }}"
+          echo "Terraform LOC: ${{ steps.loc.outputs.terraform_loc }}"
+          echo "Pulumi LOC: ${{ steps.loc.outputs.pulumi_loc }}"
           echo "Terraform Dupl: ${{ steps.terraform_dupl.outputs.terraform_dupl }}"
           echo "Terraform Lint: ${{ steps.terraform_lint.outputs.terraform_lint }}"
           
