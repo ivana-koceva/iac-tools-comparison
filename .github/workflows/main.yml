@@ -1,0 +1,28 @@
+name: Testing Tool Maintaintability
+on:
+  push:
+    branches:
+    - main
+jobs:
+  setup_ubuntu:
+    name: setup ubuntu vm
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          apt install cloc
+          apt-get install jq
+      - name: Terraform cloc
+        id: terraform_loc
+        run: |
+          cd iac-tools-comparison/terraform/docker
+          cloc main.tf --json > cloc_terraform.json
+          echo "terraform_loc=$(jq '.SUM.code' cloc_terraform.json)" >> $GITHUB_OUTPUT
+      - name: Print summary
+        run: |
+          echo "Terraform LOC: ${{ steps.terraform_loc.outputs.terraform_loc }}"
+          
+       
+        
