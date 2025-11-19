@@ -17,6 +17,7 @@ jobs:
           npm install -g jscpd
           sudo apt-get install jq
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          npm install --save-dev eslint @eslint/js typescript typescript-eslint
       - name: Tools cloc
         id: loc
         run: |
@@ -33,19 +34,23 @@ jobs:
           cd ../../pulumi/docker
           jscpd -p 'index.ts' -r json -o .
           echo "pulumi_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
-      - name: Terraform lint
-        id: terraform_lint
+      - name: Tools lint
+        id: lint
         run: |
           cd ./terraform/docker
           tflint --format=json > tflint-report.json
           echo "terraform_lint=$(echo $(($(jq '.issues | length' tflint-report.json) + $(jq '.errors | length' tflint-report.json))))" >> $GITHUB_OUTPUT
+          cd ./pulumi/docker
+          npx eslint index.ts -f json > eslint-report.json
+          echo "pulumi_lint=$(jq '.[0].messages | length' eslint-report.json)" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
           echo "Terraform LOC: ${{ steps.loc.outputs.terraform_loc }}"
           echo "Pulumi LOC: ${{ steps.loc.outputs.pulumi_loc }}"
           echo "Terraform Dupl: ${{ steps.dupl.outputs.terraform_dupl }}"
           echo "Pulumi Dupl: ${{ steps.dupl.outputs.pulumi_dupl }}"
-          echo "Terraform Lint: ${{ steps.terraform_lint.outputs.terraform_lint }}"
+          echo "Terraform Lint: ${{ steps.lint.outputs.terraform_lint }}"
+          echo "Pulumi Lint: ${{ steps.lint.outputs.pulumi_lint }}"
           
        
         
