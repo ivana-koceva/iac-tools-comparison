@@ -65,6 +65,27 @@ jobs:
         with:
           name: tflint-${{ matrix.env }}
           path: outputs/${{ matrix.env }}/tflint-report.json
+  eslint:
+    name: Lint Pulumi
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt install npm
+          npm install --save-dev eslint @eslint/js typescript typescript-eslint
+      - name: eslint
+        run: |
+          mkdir -p outputs/${{ matrix.env }}
+          npx eslint ./pulumi/${{ matrix.env }}/index.ts -f json -o outputs/${{ matrix.env }}/eslint-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eslint-${{ matrix.env }}
+          path: outputs/${{ matrix.env }}/eslint-report.json
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
@@ -90,17 +111,24 @@ jobs:
         with:
           name: tflint-${{ matrix.env }}
           path: outputs/tflint
+      - name: Download eslint artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: eslint-${{ matrix.env }}
+          path: outputs/eslint
       - name: Print summary
         run: |
           CLOC_FILE="outputs/cloc/cloc.json"
           DUPL_FILE="outputs/dupl/jscpd-report.json"
-          TFLINT_FILE="outputs/tflint/tflint-report.json"
+          TFLINT_FILE="outputs/tflint/tflint-report.json" 
+          ESLINT_FILE="outputs/eslint/eslint-report.json"
           echo "Environment: ${{ matrix.env }}"
           echo "Terraform LOC: $(jq '.HCL.code' "$CLOC_FILE")"
           echo "Pulumi LOC: $(jq '.TypeScript.code' "$CLOC_FILE")"
           echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' "$DUPL_FILE")"
           echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' "$DUPL_FILE")"
           echo "Terraform Lint: $(jq '(.issues | length) + (.errors | length)' "$TFLINT_FILE")"
+          echo "Terraform Lint: $(jq '.[0].messages | length' "$ESLINT_FILE")"
           
        
         
