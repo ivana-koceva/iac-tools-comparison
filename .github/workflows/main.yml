@@ -17,7 +17,6 @@ jobs:
           npm install -g jscpd
           sudo apt-get install jq
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          cd ./pulumi/docker
           npm install --save-dev eslint @eslint/js typescript typescript-eslint
       - name: Tools cloc
         id: loc
@@ -43,7 +42,7 @@ jobs:
           echo "terraform_lint=$(echo $(($(jq '.issues | length' tflint-report.json) + $(jq '.errors | length' tflint-report.json))))" >> $GITHUB_OUTPUT
           cd ../../pulumi/docker
           npx eslint index.ts -f json > eslint-report.json
-          # echo "pulumi_lint=$(jq '.[0].messages | length' eslint-report.json)" >> $GITHUB_OUTPUT
+          echo "pulumi_lint=$(jq '.[0].messages | length' eslint-report.json)" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
           echo "Terraform LOC: ${{ steps.loc.outputs.terraform_loc }}"
