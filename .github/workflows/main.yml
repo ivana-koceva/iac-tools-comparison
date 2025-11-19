@@ -32,8 +32,9 @@ jobs:
         run: sudo apt-get install jq
       - name: Print summary
         run: |
-          echo "Terraform LOC: $(jq '.HCL.code' ${{ needs.cloc.outputs.cloc_file }})"
-          echo "Pulumi LOC: $(jq '.TypeScript.code' ${{ needs.cloc.outputs.cloc_file }})"
+          echo '${{ needs.cloc.outputs.cloc_file }}' > cloc.json
+          echo "Terraform LOC: $(jq '.HCL.code' cloc.json)"
+          echo "Pulumi LOC: $(jq '.TypeScript.code' cloc.json)"
           
        
         
