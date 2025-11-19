@@ -41,7 +41,7 @@ jobs:
           tflint --format=json > tflint-report.json
           echo "terraform_lint=$(echo $(($(jq '.issues | length' tflint-report.json) + $(jq '.errors | length' tflint-report.json))))" >> $GITHUB_OUTPUT
           cd ../../pulumi/docker
-          npx eslint ../../pulumi/docker/index.ts -f json -o eslint-report.json
+          npx eslint ../../pulumi/docker/index.ts -f json -o eslint-report.json || true
           echo "pulumi_lint=$(jq '.[0].messages | length' eslint-report.json)" >> $GITHUB_OUTPUT
       - name: Print summary
         run: |
