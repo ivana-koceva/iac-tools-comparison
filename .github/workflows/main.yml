@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       cloc_file: ${{ steps.loc.outputs.cloc_that }}
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -17,7 +20,7 @@ jobs:
       - name: Tools cloc
         id: loc
         run: |
-          cloc_that=$(cloc ./terraform/docker/main.tf ./pulumi/docker/index.ts --json)
+          cloc_that=$(cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts --json)
           {
             echo 'cloc_that<<EOF'
             echo "$cloc_that"
@@ -28,6 +31,9 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       dupl_file: ${{ steps.dupl.outputs.dupl_that }}
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -38,7 +44,7 @@ jobs:
       - name: Tools jscpd
         id: dupl
         run: |
-          jscpd ./terraform/docker/main.json ./pulumi/docker/index.ts -r json -o .
+          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts -r json -o .
           dupl_that=$(cat jscpd-report.json)
           {
             echo 'dupl_that<<EOF'
@@ -49,11 +55,15 @@ jobs:
     name: Results Summary
     runs-on: ubuntu-22.04
     needs: [cloc, dupl]
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
     steps:
       - name: Install dependencies
         run: sudo apt-get install jq
       - name: Print summary
         run: |
+          echo "Environment: ${{ matrix.env }}"
           echo '${{ needs.cloc.outputs.cloc_file }}' > cloc.json
           echo '${{ needs.dupl.outputs.dupl_file }}' > dupl.json
           echo "Terraform LOC: $(jq '.HCL.code' cloc.json)"
