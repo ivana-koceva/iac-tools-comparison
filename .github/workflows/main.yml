@@ -16,7 +16,13 @@ jobs:
         run: sudo apt install cloc
       - name: Tools cloc
         id: loc
-        run: echo "cloc_that=$(cloc ./terraform/docker/main.tf ./pulumi/docker/index.ts --json)" >> $GITHUB_OUTPUT
+        run: |
+          cloc_that=$(cloc ./terraform/docker/main.tf ./pulumi/docker/index.ts --json)
+          {
+            echo 'cloc_that<<EOF'
+            echo "$cloc_that"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
