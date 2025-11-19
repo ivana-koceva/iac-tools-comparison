@@ -24,12 +24,15 @@ jobs:
           echo "terraform_loc=$(jq '.SUM.code' cloc_terraform.json)" >> $GITHUB_OUTPUT
           cloc ./pulumi/docker/index.ts --json > cloc_pulumi.json
           echo "pulumi_loc=$(jq '.SUM.code' cloc_pulumi.json)" >> $GITHUB_OUTPUT
-      - name: Terraform duplicate resources
-        id: terraform_dupl
+      - name: Tools duplicate resources
+        id: dupl
         run: |
           cd ./terraform/docker
           jscpd -p 'main.json' -r json -o .
           echo "terraform_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
+          cd ./pulumi/docker
+          jscpd -p 'index.ts' -r json -o .
+          echo "pulumi_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
       - name: Terraform lint
         id: terraform_lint
         run: |
@@ -40,7 +43,8 @@ jobs:
         run: |
           echo "Terraform LOC: ${{ steps.loc.outputs.terraform_loc }}"
           echo "Pulumi LOC: ${{ steps.loc.outputs.pulumi_loc }}"
-          echo "Terraform Dupl: ${{ steps.terraform_dupl.outputs.terraform_dupl }}"
+          echo "Terraform Dupl: ${{ steps.dupl.outputs.terraform_dupl }}"
+          echo "Pulumi Dupl: ${{ steps.dupl.outputs.pulumi_dupl }}"
           echo "Terraform Lint: ${{ steps.terraform_lint.outputs.terraform_lint }}"
           
        
