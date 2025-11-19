@@ -67,7 +67,7 @@ jobs:
           name: dupl-${{ matrix.env }}
           path: outputs/dupl
       - name: Print summary
-      - run: |
+        run: |
           CLOC_FILE="outputs/cloc/cloc.json"
           DUPL_FILE="outputs/dupl/jscpd-report.json"
           echo "Environment: ${{ matrix.env }}"
