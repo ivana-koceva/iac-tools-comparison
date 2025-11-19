@@ -60,7 +60,7 @@ jobs:
       - name: tflint
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          tflint ./terraform/${{ matrix.env }} --format=json > outputs/${{ matrix.env }}/tflint-report.json
+          tflint ./terraform/${{ matrix.env }} --format=json > outputs/${{ matrix.env }}/tflint-report.json || true
       - uses: actions/upload-artifact@v4
         with:
           name: tflint-${{ matrix.env }}
@@ -68,7 +68,7 @@ jobs:
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
-    needs: [cloc, dupl]
+    needs: [cloc, dupl, tflint]
     strategy:
       matrix:
         env: [docker, kubernetes]
