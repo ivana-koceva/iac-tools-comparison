@@ -17,7 +17,7 @@ jobs:
           npm install -g jscpd
           sudo apt-get install jq
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          npm install --save-dev eslint @eslint/js typescript typescript-eslint
+          npm install -g eslint @eslint/js typescript typescript-eslint
       - name: Tools cloc
         id: loc
         run: |
