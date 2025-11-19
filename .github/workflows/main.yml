@@ -37,13 +37,9 @@ jobs:
       - name: Tools lint
         id: lint
         run: |
-          pwd
-          ls -l
           cd ./terraform/docker
           tflint --format=json > tflint-report.json
           echo "terraform_lint=$(echo $(($(jq '.issues | length' tflint-report.json) + $(jq '.errors | length' tflint-report.json))))" >> $GITHUB_OUTPUT
-          pwd
-          ls -l
           cd ../../pulumi/docker
           npx eslint index.ts -f json > eslint-report.json
           echo "pulumi_lint=$(jq '.[0].messages | length' eslint-report.json)" >> $GITHUB_OUTPUT
