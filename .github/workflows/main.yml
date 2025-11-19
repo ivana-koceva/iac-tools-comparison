@@ -20,7 +20,7 @@ jobs:
         run: |
           mkdir -p outputs/${{ matrix.env }}
           cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts --json > outputs/${{ matrix.env }}/cloc.json
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: cloc-${{ matrix.env }}
           path: outputs/cloc.json
@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p outputs/${{ matrix.env }}
           jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts -r json -o outputs/${{ matrix.env }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: dupl-${{ matrix.env }}
           path: outputs/jscpd-report.json
@@ -57,12 +57,12 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install jq
       - name: Download cloc artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: cloc-${{ matrix.env }}
           path: outputs/cloc
       - name: Download jscpd artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dupl-${{ matrix.env }}
           path: outputs/dupl
