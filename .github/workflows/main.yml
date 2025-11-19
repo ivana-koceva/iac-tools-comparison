@@ -7,8 +7,6 @@ jobs:
   cloc:
     name: Cloc Tools
     runs-on: ubuntu-22.04
-    outputs:
-      cloc_file: ${{ steps.loc.outputs.cloc_that }}
     strategy:
       matrix:
         env: [docker, kubernetes]
@@ -20,17 +18,15 @@ jobs:
       - name: Tools cloc
         id: loc
         run: |
-          cloc_that=$(cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts --json)
-          {
-            echo 'cloc_that<<EOF'
-            echo "$cloc_that"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+          mkdir -p outputs/${{ matrix.env }}
+          cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts --json > outputs/${{ matrix.env }}/cloc.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: cloc-${{ matrix.env }}
+          path: outputs/cloc.json
   dupl:
     name: Dupl Tools
     runs-on: ubuntu-22.04
-    outputs:
-      dupl_file: ${{ steps.dupl.outputs.dupl_that }}
     strategy:
       matrix:
         env: [docker, kubernetes]
@@ -44,13 +40,12 @@ jobs:
       - name: Tools jscpd
         id: dupl
         run: |
-          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts -r json -o .
-          dupl_that=$(cat jscpd-report.json)
-          {
-            echo 'dupl_that<<EOF'
-            echo "$dupl_that"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+          mkdir -p outputs/${{ matrix.env }}
+          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts -r json -o outputs/${{ matrix.env }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dupl-${{ matrix.env }}
+          path: outputs/jscpd-report.json
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
@@ -62,14 +57,22 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install jq
       - name: Print summary
-        run: |
+      - uses: actions/download-artifact@v3
+        with:
+          name: cloc-${{ matrix.env }}
+          path: outputs/cloc
+      - uses: actions/download-artifact@v3
+        with:
+          name: dupl-${{ matrix.env }}
+          path: outputs/dupl
+      - run: |
+          CLOC_FILE="outputs/cloc/cloc.json"
+          DUPL_FILE="outputs/dupl/jscpd-report.json"
           echo "Environment: ${{ matrix.env }}"
-          echo '${{ needs.cloc.outputs.cloc_file }}' > cloc.json
-          echo '${{ needs.dupl.outputs.dupl_file }}' > dupl.json
-          echo "Terraform LOC: $(jq '.HCL.code' cloc.json)"
-          echo "Pulumi LOC: $(jq '.TypeScript.code' cloc.json)"
-          echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' dupl.json)"
-          echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' dupl.json)"
+          echo "Terraform LOC: $(jq '.HCL.code' "$CLOC_FILE")"
+          echo "Pulumi LOC: $(jq '.TypeScript.code' "$CLOC_FILE")"
+          echo "Terraform Dupl: $(jq '.statistics.formats.hcl.total.clones' "$DUPL_FILE")"
+          echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' "$DUPL_FILE")"
           
        
         
