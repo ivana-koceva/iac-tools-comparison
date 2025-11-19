@@ -56,15 +56,17 @@ jobs:
     steps:
       - name: Install dependencies
         run: sudo apt-get install jq
-      - name: Print summary
-      - uses: actions/download-artifact@v3
+      - name: Download cloc artifact
+        uses: actions/download-artifact@v3
         with:
           name: cloc-${{ matrix.env }}
           path: outputs/cloc
-      - uses: actions/download-artifact@v3
+      - name: Download jscpd artifact
+        uses: actions/download-artifact@v3
         with:
           name: dupl-${{ matrix.env }}
           path: outputs/dupl
+      - name: Print summary
       - run: |
           CLOC_FILE="outputs/cloc/cloc.json"
           DUPL_FILE="outputs/dupl/jscpd-report.json"
