@@ -89,7 +89,7 @@ jobs:
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
-    needs: [cloc, dupl, tflint]
+    needs: [cloc, dupl, tflint, eslint]
     strategy:
       matrix:
         env: [docker, kubernetes]
