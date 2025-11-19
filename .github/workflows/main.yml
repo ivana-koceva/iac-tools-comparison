@@ -46,6 +46,25 @@ jobs:
         with:
           name: dupl-${{ matrix.env }}
           path: outputs/${{ matrix.env }}/jscpd-report.json
+  tflint:
+    name: Lint Terraform
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+      - name: tflint
+        run: |
+          mkdir -p outputs/${{ matrix.env }}
+          tflint ./terraform/${{ matrix.env }} --format=json > outputs/${{ matrix.env }}/tflint-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tflint-${{ matrix.env }}
+          path: outputs/${{ matrix.env }}/tflint-report.json
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
@@ -66,15 +85,22 @@ jobs:
         with:
           name: dupl-${{ matrix.env }}
           path: outputs/dupl
+      - name: Download tflint artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tflint-${{ matrix.env }}
+          path: outputs/tflint
       - name: Print summary
         run: |
           CLOC_FILE="outputs/cloc/cloc.json"
           DUPL_FILE="outputs/dupl/jscpd-report.json"
+          TFLINT_FILE="outputs/tflint/tflint-report.json"
           echo "Environment: ${{ matrix.env }}"
           echo "Terraform LOC: $(jq '.HCL.code' "$CLOC_FILE")"
           echo "Pulumi LOC: $(jq '.TypeScript.code' "$CLOC_FILE")"
           echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' "$DUPL_FILE")"
           echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' "$DUPL_FILE")"
+          echo "Terraform Lint: $(jq '(.issues | length) + (.errors | length)' "$TFLINT_FILE")"
           
        
         
