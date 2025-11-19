@@ -55,7 +55,7 @@ jobs:
       - name: Print summary
         run: |
           echo '${{ needs.cloc.outputs.cloc_file }}' > cloc.json
-          echo '${{ needs.cloc.outputs.cloc_file }}' > dupl.json
+          echo '${{ needs.dupl.outputs.dupl_file }}' > dupl.json
           echo "Terraform LOC: $(jq '.HCL.code' cloc.json)"
           echo "Pulumi LOC: $(jq '.TypeScript.code' cloc.json)"
           echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' dupl.json)"
