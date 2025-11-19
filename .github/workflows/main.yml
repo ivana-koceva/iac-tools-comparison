@@ -22,7 +22,7 @@ jobs:
         run: |
           cloc ./terraform/docker/main.tf --json > cloc_terraform.json
           echo "terraform_loc=$(jq '.SUM.code' cloc_terraform.json)" >> $GITHUB_OUTPUT
-          cloc ../../pulumi/docker/index.ts --json > cloc_pulumi.json
+          cloc ./pulumi/docker/index.ts --json > cloc_pulumi.json
           echo "pulumi_loc=$(jq '.SUM.code' cloc_pulumi.json)" >> $GITHUB_OUTPUT
       - name: Tools duplicate resources
         id: dupl
@@ -30,7 +30,7 @@ jobs:
           cd ./terraform/docker
           jscpd -p 'main.json' -r json -o .
           echo "terraform_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
-          cd ./pulumi/docker
+          cd ../../pulumi/docker
           jscpd -p 'index.ts' -r json -o .
           echo "pulumi_dupl=$(jq '.statistics.total.clones' jscpd-report.json)" >> $GITHUB_OUTPUT
       - name: Terraform lint
