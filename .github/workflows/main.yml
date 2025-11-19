@@ -23,18 +23,43 @@ jobs:
             echo "$cloc_that"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
+  dupl:
+    name: Dupl Tools
+    runs-on: ubuntu-22.04
+    outputs:
+      dupl_file: ${{ steps.dupl.outputs.dupl_that }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          sudo apt install npm
+          npm install -g jscpd
+      - name: Tools jscpd
+        id: dupl
+        run: |
+          jscpd ./terraform/docker/main.json ./pulumi/docker/index.ts -r json -o .
+          dupl_that=$(cat jscpd-report.json)
+          {
+            echo 'dupl_that<<EOF'
+            echo "$dupl_that"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
-    needs: cloc
+    needs: [cloc, dupl]
     steps:
       - name: Install dependencies
         run: sudo apt-get install jq
       - name: Print summary
         run: |
           echo '${{ needs.cloc.outputs.cloc_file }}' > cloc.json
+          echo '${{ needs.cloc.outputs.cloc_file }}' > dupl.json
           echo "Terraform LOC: $(jq '.HCL.code' cloc.json)"
           echo "Pulumi LOC: $(jq '.TypeScript.code' cloc.json)"
+          echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' dupl.json)"
+          echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' dupl.json)"
           
        
         
