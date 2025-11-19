@@ -23,7 +23,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: cloc-${{ matrix.env }}
-          path: outputs/cloc.json
+          path: outputs/${{ matrix.env }}/cloc.json
   dupl:
     name: Dupl Tools
     runs-on: ubuntu-22.04
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: dupl-${{ matrix.env }}
-          path: outputs/jscpd-report.json
+          path: outputs/${{ matrix.env }}/jscpd-report.json
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
