@@ -128,7 +128,7 @@ jobs:
           echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' "$DUPL_FILE")"
           echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' "$DUPL_FILE")"
           echo "Terraform Lint: $(jq '(.issues | length) + (.errors | length)' "$TFLINT_FILE")"
-          echo "Terraform Lint: $(jq '.[0].messages | length' "$ESLINT_FILE")"
+          echo "Pulumi Lint: $(jq '.[0].messages | length' "$ESLINT_FILE")"
           
        
         
