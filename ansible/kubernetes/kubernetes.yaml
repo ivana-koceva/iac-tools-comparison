@@ -1,0 +1,197 @@
+- name: kubernetes apply
+  hosts: home
+  tasks:
+    - name: create namespace
+      kubernetes.core.k8s:
+        name: blogs
+        api_version: v1
+        kind: Namespace
+        state: present
+    - name: create configmap
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          state: present
+          metadata:
+            name: blog-config
+            namespace: blogs
+          data:
+            POSTGRES_HOST: "blogdb"
+            POSTGRES_PORT: "5432"
+            POSTGRES_DB: "blogs"
+    - name: create secret
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          state: present
+          metadata:
+            name: blog-secrets
+            namespace: blogs
+          type: Opaque
+          data:
+            POSTGRES_USER: cG9zdGdyZXM=
+            POSTGRES_PASSWORD: YWRtaW4=
+    - name: create db statefulset
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: StatefulSet
+          state: started
+          metadata:
+            name: blogdb
+            namespace: blogs
+          spec:
+            serviceName: "blogdb"
+            replicas: 1
+            selector:
+              matchLabels:
+                app: blogdb
+            template:
+              metadata:
+                labels:
+                  app: blogdb
+              spec:
+                containers:
+                  - name: postgres
+                    image: postgres:latest
+                    ports:
+                      - containerPort: 5432
+                    env:
+                      - name: POSTGRES_USER
+                        valueFrom:
+                          secretKeyRef:
+                            name: blog-secrets
+                            key: POSTGRES_USER
+                      - name: POSTGRES_PASSWORD
+                        valueFrom:
+                          secretKeyRef:
+                            name: blog-secrets
+                            key: POSTGRES_PASSWORD
+                      - name: POSTGRES_DB
+                        valueFrom:
+                          configMapKeyRef:
+                            name: blog-config
+                            key: POSTGRES_DB
+                      - name: PGDATA
+                        value: /var/lib/postgresql/pgdata
+                    volumeMounts:
+                      - name: blogdb-data
+                        mountPath: /var/lib/postgresql
+            volumeClaimTemplates:
+              - metadata:
+                  name: blogdb-data
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 1Gi
+    - name: create blog deployment
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          state: started
+          metadata:
+            name: blog-deployment
+            namespace: blogs
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: blog
+            template:
+              metadata:
+                labels:
+                  app: blog
+              spec:
+                containers:
+                  - name: blog-app
+                    image: ivanakoceva/blog-app:latest
+                    ports:
+                      - containerPort: 8080
+                    env:
+                    - name: POSTGRES_HOST
+                      valueFrom:
+                        configMapKeyRef:
+                          name: blog-config
+                          key: POSTGRES_HOST
+                    - name: POSTGRES_PORT
+                      valueFrom:
+                        configMapKeyRef:
+                          name: blog-config
+                          key: POSTGRES_PORT
+                    - name: POSTGRES_DB
+                      valueFrom:
+                        configMapKeyRef:
+                          name: blog-config
+                          key: POSTGRES_DB
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: blog-secrets
+                          key: POSTGRES_USER
+                    - name: POSTGRES_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: blog-secrets
+                          key: POSTGRES_PASSWORD
+    - name: create blog service
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          state: present
+          metadata:
+            name: blog-service
+            namespace: blogs
+          spec:
+            selector:
+              app: blog
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 8080
+            type: ClusterIP
+    - name: create db service
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          state: present
+          metadata:
+            name: blogdb
+            namespace: blogs
+          spec:
+            selector:
+              app: blogdb
+            ports:
+              - protocol: TCP
+                port: 5432
+                targetPort: 5432
+            clusterIP: None
+    - name: create ingress
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          state: present
+          metadata:
+            name: blog-ingress
+            namespace: blogs
+            annotations:
+              nginx.ingress.kubernetes.io/ingress.class: "nginx"
+          spec:
+            ingressClassName: nginx
+            rules:
+              - host: blog.local
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: blog-service
+                          port:
+                            number: 80

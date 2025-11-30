@@ -1,0 +1,74 @@
+- name: kubernetes apply
+  hosts: home
+  tasks:
+    - name: rm ingress
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          state: absent
+          metadata:
+            name: blog-ingress
+            namespace: blogs
+            annotations:
+              nginx.ingress.kubernetes.io/ingress.class: "nginx"
+    - name: rm db service
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          state: absent
+          metadata:
+            name: blogdb
+            namespace: blogs
+    - name: rm blog service
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          state: absent
+          metadata:
+            name: blog-service
+            namespace: blogs
+    - name: rm blog deployment
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          state: absent
+          metadata:
+            name: blog-deployment
+            namespace: blogs
+    - name: rm db statefulset
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: StatefulSet
+          state: absent
+          metadata:
+            name: blogdb
+            namespace: blogs      
+    - name: rm secret
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          state: absent
+          metadata:
+            name: blog-secrets
+            namespace: blogs      
+    - name: rm configmap
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          state: absent
+          metadata:
+            name: blog-config
+            namespace: blogs
+    - name: rm namespace
+      kubernetes.core.k8s:
+        name: blogs
+        api_version: v1
+        kind: Namespace
+        state: absent

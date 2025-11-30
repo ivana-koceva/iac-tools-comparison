@@ -1,0 +1,50 @@
+- name: docker apply
+  hosts: home
+  tasks:
+    - name: pull backend image
+      community.docker.docker_image_pull:
+        name: ivanakoceva/blog-app:latest
+        pull: not_present
+    - name: pull db image
+      community.docker.docker_image_pull:
+        name: postgres:17-alpine
+        pull: not_present
+    - name: create network
+      community.docker.docker_network:
+        name: blog_network
+        state: present
+    - name: create volume
+      community.docker.docker_volume:
+        name: blogdb_data
+        state: present
+    - name: create db container
+      community.docker.docker_container:
+        name: db_service
+        image: postgres:17-alpine
+        state: started
+        networks:
+        - name: blog_network
+        ports:
+        - "5432:5432"
+        env:
+          POSTGRES_DB: "blogs"
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "admin"
+        volumes:
+          - "blogdb_data:/var/lib/postgresql/data"
+    - name: create blog container
+      community.docker.docker_container:
+        name: blog_service
+        image: ivanakoceva/blog-app:latest
+        state: started
+        networks:
+        - name: blog_network
+        ports:
+        - "8080:8080"
+        env:
+          POSTGRES_HOST: "db_service"
+          POSTGRES_DB: "blogs"
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "admin"
+          POSTGRES_PORT: "5432"
+        
