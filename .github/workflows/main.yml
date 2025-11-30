@@ -19,7 +19,7 @@ jobs:
         id: loc
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts --json > outputs/${{ matrix.env }}/cloc.json
+          cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}//${{matrix.env}}.yaml --json > outputs/${{ matrix.env }}/cloc.json
       - uses: actions/upload-artifact@v4
         with:
           name: cloc-${{ matrix.env }}
@@ -41,7 +41,7 @@ jobs:
         id: dupl
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts -r json -o outputs/${{ matrix.env }}
+          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}/${{matrix.env}}.yaml -r json -o outputs/${{ matrix.env }}
       - uses: actions/upload-artifact@v4
         with:
           name: dupl-${{ matrix.env }}
@@ -125,8 +125,10 @@ jobs:
           echo "Environment: ${{ matrix.env }}"
           echo "Terraform LOC: $(jq '.HCL.code' "$CLOC_FILE")"
           echo "Pulumi LOC: $(jq '.TypeScript.code' "$CLOC_FILE")"
+          echo "Ansible LOC: $(jq '.YAML.code' "$CLOC_FILE")"
           echo "Terraform Dupl: $(jq '.statistics.formats.json.total.clones' "$DUPL_FILE")"
           echo "Pulumi Dupl: $(jq '.statistics.formats.typescript.total.clones' "$DUPL_FILE")"
+          echo "Ansible Dupl: $(jq '.statistics.formats.yaml.total.clones' "$DUPL_FILE")"
           echo "Terraform Lint: $(jq '(.issues | length) + (.errors | length)' "$TFLINT_FILE")"
           echo "Pulumi Lint: $(jq '.[0].messages | length' "$ESLINT_FILE")"
           
