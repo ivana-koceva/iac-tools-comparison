@@ -86,10 +86,31 @@ jobs:
         with:
           name: eslint-${{ matrix.env }}
           path: outputs/${{ matrix.env }}/eslint-report.json
+  ansible-lint:
+    name: Lint Ansible
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        env: [docker, kubernetes]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible ansible-lint
+      - name: ansible-lint
+        run: |
+          mkdir -p outputs/${{ matrix.env }}
+          ansible-lint -t playbook -f json ./ansible/${{ matrix.env }}/${{ matrix.env }}.yaml > outputs/${{ matrix.env }}/ansible-lint-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ansible-lint-${{ matrix.env }}
+          path: outputs/${{ matrix.env }}/ansible-lint-report.json
   results:
     name: Results Summary
     runs-on: ubuntu-22.04
-    needs: [cloc, dupl, tflint, eslint]
+    needs: [cloc, dupl, tflint, eslint, ansible-lint]
     strategy:
       matrix:
         env: [docker, kubernetes]
@@ -116,12 +137,18 @@ jobs:
         with:
           name: eslint-${{ matrix.env }}
           path: outputs/eslint
+      - name: Download ansible-lint artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ansible-lint-${{ matrix.env }}
+          path: outputs/ansible-lint
       - name: Print summary
         run: |
           CLOC_FILE="outputs/cloc/cloc.json"
           DUPL_FILE="outputs/dupl/jscpd-report.json"
           TFLINT_FILE="outputs/tflint/tflint-report.json" 
           ESLINT_FILE="outputs/eslint/eslint-report.json"
+          ANSIBLE_LINT_FILE="outputs/ansible-lint/ansible-lint-report.json"
           echo "Environment: ${{ matrix.env }}"
           echo "Terraform LOC: $(jq '.HCL.code' "$CLOC_FILE")"
           echo "Pulumi LOC: $(jq '.TypeScript.code' "$CLOC_FILE")"
@@ -131,6 +158,7 @@ jobs:
           echo "Ansible Dupl: $(jq '.statistics.formats.yaml.total.clones' "$DUPL_FILE")"
           echo "Terraform Lint: $(jq '(.issues | length) + (.errors | length)' "$TFLINT_FILE")"
           echo "Pulumi Lint: $(jq '.[0].messages | length' "$ESLINT_FILE")"
+          echo "Ansible Lint: $(jq 'length' "$ANSIBLE_LINT_FILE")"
           
        
         
