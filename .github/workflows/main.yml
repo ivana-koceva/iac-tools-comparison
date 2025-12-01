@@ -19,7 +19,7 @@ jobs:
         id: loc
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}//${{matrix.env}}.yaml --json > outputs/${{ matrix.env }}/cloc.json
+          cloc ./terraform/${{matrix.env}}/main.tf ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}/playbook.yml --json > outputs/${{ matrix.env }}/cloc.json
       - uses: actions/upload-artifact@v4
         with:
           name: cloc-${{ matrix.env }}
@@ -41,7 +41,7 @@ jobs:
         id: dupl
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}/${{matrix.env}}.yaml -r json -o outputs/${{ matrix.env }}
+          jscpd ./terraform/${{matrix.env}}/main.json ./pulumi/${{matrix.env}}/index.ts ./ansible/${{matrix.env}}/playbook.yml -r json -o outputs/${{ matrix.env }}
       - uses: actions/upload-artifact@v4
         with:
           name: dupl-${{ matrix.env }}
@@ -102,7 +102,7 @@ jobs:
       - name: ansible-lint
         run: |
           mkdir -p outputs/${{ matrix.env }}
-          ansible-lint -t playbook -f json ./ansible/${{ matrix.env }}/${{ matrix.env }}.yaml > outputs/${{ matrix.env }}/ansible-lint-report.json || true
+          ansible-lint -t playbook -f json ./ansible/${{ matrix.env }}/playbook.yml > outputs/${{ matrix.env }}/ansible-lint-report.json || true
       - uses: actions/upload-artifact@v4
         with:
           name: ansible-lint-${{ matrix.env }}
