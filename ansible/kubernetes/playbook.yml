@@ -9,10 +9,10 @@
         state: present
     - name: create configmap
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: v1
           kind: ConfigMap
-          state: present
           metadata:
             name: blog-config
             namespace: blogs
@@ -22,10 +22,10 @@
             POSTGRES_DB: "blogs"
     - name: create secret
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: v1
           kind: Secret
-          state: present
           metadata:
             name: blog-secrets
             namespace: blogs
@@ -35,10 +35,10 @@
             POSTGRES_PASSWORD: YWRtaW4=
     - name: create db statefulset
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: apps/v1
           kind: StatefulSet
-          state: started
           metadata:
             name: blogdb
             namespace: blogs
@@ -89,10 +89,10 @@
                       storage: 1Gi
     - name: create blog deployment
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: apps/v1
           kind: Deployment
-          state: started
           metadata:
             name: blog-deployment
             namespace: blogs
@@ -139,10 +139,10 @@
                           key: POSTGRES_PASSWORD
     - name: create blog service
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: v1
           kind: Service
-          state: present
           metadata:
             name: blog-service
             namespace: blogs
@@ -156,10 +156,10 @@
             type: ClusterIP
     - name: create db service
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: v1
           kind: Service
-          state: present
           metadata:
             name: blogdb
             namespace: blogs
@@ -173,10 +173,10 @@
             clusterIP: None
     - name: create ingress
       kubernetes.core.k8s:
+        state: present
         definition:
           apiVersion: networking.k8s.io/v1
           kind: Ingress
-          state: present
           metadata:
             name: blog-ingress
             namespace: blogs
