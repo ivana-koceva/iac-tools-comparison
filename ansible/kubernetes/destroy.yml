@@ -1,5 +1,5 @@
 - name: kubernetes apply
-  hosts: home
+  hosts: home, managed
   tasks:
     - name: rm ingress
       kubernetes.core.k8s:

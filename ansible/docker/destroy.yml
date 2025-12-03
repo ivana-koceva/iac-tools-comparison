@@ -1,5 +1,5 @@
 - name: docker destroy
-  hosts: home
+  hosts: home, managed
   tasks: 
     - name: rm blog container
       community.docker.docker_container:
