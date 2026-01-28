@@ -1,0 +1,25 @@
+- name: docker destroy
+  hosts: home, managed
+  tasks: 
+    - name: rm blog container
+      community.docker.docker_container:
+        name: blog_service
+        state: absent
+    - name: rm db container
+      community.docker.docker_container:
+        name: db_service
+        state: absent
+    - name: rm a volume
+      community.docker.docker_volume:
+        name: blogdb_data
+        state: absent
+    - name: rm network
+      community.docker.docker_network:
+        name: blog_network
+        state: absent
+    - name: rm db image
+      community.docker.docker_image_remove:
+        name: postgres:17-alpine
+    - name: rm backend image
+      community.docker.docker_image_remove:
+        name: ivanakoceva/blog-app:latest
